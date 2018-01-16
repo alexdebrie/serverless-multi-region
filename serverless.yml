@@ -1,0 +1,68 @@
+service: serverless-keyvalue
+
+frameworkVersion: ">=1.25.0"
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: ${self:provider.region}.keyvalue.serverlessteam.com
+    endpointType: 'regional'
+    certificateName: "*.keyvalue.serverlessteam.com"
+    certificateRegion: ${opt:region}
+    createRoute53Record: true
+  tableName: "keyvalues"
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: dev
+  region: ${opt:region}
+  endpointType: regional
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource:
+        "Fn::GetAtt":
+            - KeyValuesDynamoDBTable
+            - Arn
+  environment:
+    KEY_TABLE:
+      Ref: KeyValuesDynamoDBTable
+
+functions:
+  getKey:
+    handler: handlers/get_key.main
+    events:
+      - http:
+          path: /{key}
+          method: get
+  setKey:
+    handler: handlers/set_key.main
+    events:
+      - http:
+          path: /{key}
+          method: post
+
+resources:
+  Resources:
+    KeyValuesDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          -
+            AttributeName: key
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: key
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES

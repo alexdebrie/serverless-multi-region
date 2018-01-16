@@ -1,0 +1,15 @@
+{
+  "name": "keyvalue",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-domain-manager": "git://github.com/MentalBrake/serverless-domain-manager.git#cbe992e"
+  },
+  "description": ""
+}
