@@ -7,11 +7,10 @@ plugins:
 
 custom:
   customDomain:
-    domainName: ${self:provider.region}.keyvalue.serverlessteam.com
+    domainName: keyvalue.serverlessteam.com
     endpointType: 'regional'
-    certificateName: "*.keyvalue.serverlessteam.com"
     certificateRegion: ${opt:region}
-    createRoute53Record: true
+    createRoute53Record: false
   tableName: "keyvalues"
 
 provider:

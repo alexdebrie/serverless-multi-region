@@ -5,36 +5,61 @@
     ```
     custom:
       customDomain:
-        domainName: ${self:provider.region}.keyvalue.<mydomain>.com
+        domainName: keyvalue.<mydomain>.com
         endpointType: 'regional'
-        certificateName: "*.keyvalue.<mydomain>.com"
         certificateRegion: ${opt:region}
-        createRoute53Record: true
+        createRoute53Record: false
       tableName: "keyvalues"
     ```
     
-2. Create `*.keyvalue.<mydomain>.com` certificates in ACM **in both us-west-2 and eu-central-1.**
+2. Create `keyvalue.<mydomain>.com` certificates in ACM **in both us-west-2 and eu-central-1.**
 
 3. Create the custom domains for both regions:
 
     ```bash
     $ sls create_domain --region us-west-2
-    Serverless: 'us-west-2.keyvalue.<mydomain>.com' was created/updated. New domains may take up to 40 minutes to be initialized.
+    Serverless: 'keyvalue.<mydomain>.com' was created/updated. New domains may take up to 40 minutes to be initialized.
     $ sls create_domain --region eu-central-1
-    Serverless: 'eu-central-1.keyvalue.<mydomain>.com' was created/updated. New domains may take up to 40 minutes to be initialized.
+    Serverless: 'keyvalue.<mydomain>.com' was created/updated. New domains may take up to 40 minutes to be initialized.
     ```
     
-4. Deploy your services:
+4. Deploy your service in `us-west-2`:
 
 	```bash
 	$ sls deploy --region us-west-2
 	...<deploy output> ...
+	```
+
+5. Test it!
+
+	Set a key in US West:
 	
+	```bash
+	$ curl -X POST https://<apiGatewaydomain>/dev/mytestkey -d '{"value": "Just testing"}'
+	{"key": "mytestkey", "value": "Just testing", "region": "us-west-2"}
+	```
+	
+	Retrieve the key in US West:
+	
+	```bash
+	$ curl -X GET https://<apiGatewaydomain>/dev/mytestkey
+	{"key": "mytestkey", "value": "Just testing", "writeRegion": "us-west-2", "readRegion": "us-west-2"}
+	```
+	
+6. Deploy to `eu-central-1`:
+
+	```bash
 	$ sls deploy --region eu-central-1
 	...<deploy output> ...
 	```
 
-5. Initialize your global table:
+7. Clean out your initial table:
+
+	```bash
+	$ bash clean-table.sh
+	```
+	
+8. Create your global table:
 
 	```bash
 	$ bash create-global-table.sh
@@ -50,33 +75,39 @@
 	                "RegionName": "eu-central-1"
 	            }
 	        ],
-	        "CreationDateTime": 1516118222.157,
+	        "CreationDateTime": 1516220398.243,
 	        "GlobalTableArn": "arn:aws:dynamodb::488110005556:global-table/keyvalues"
 	    }
 	}
 	```
 
-6. Test it!
+9. Test it out!
 
 	Set a key in US West:
 	
 	```bash
-	$ curl -X POST https://us-west-2.keyvalue.serverlessteam.com/mytestkey -d '{"value": "Just testing"}'
+	$ curl -X POST https://<us-west-2-domain>/dev/mytestkey -d '{"value": "Just testing"}'
 	{"key": "mytestkey", "value": "Just testing", "region": "us-west-2"}
 	```
 	
 	Retrieve the key in US West:
 	
 	```bash
-	$ curl -X GET https://us-west-2.keyvalue.serverlessteam.com/mytestkey
-	{"key": "mytestkey", "value": "Just testing", "writeRegion": "us-west-2", "readRegion": "us-west-2"}
-	```
-	
-	Retrieve the key in EU Central:
-	
-	```bash
-	$ curl -X GET https://eu-central-1.keyvalue.serverlessteam.com/mytestkey
-	{"key": "mytestkey", "value": "Just testing", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
+	$ curl -X GET https://<eu-central-1-domain>/dev/mytestkey
+{"key": "mytestkey", "value": "my value", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
 	```
 
+10. Set up the Route53 Latency records:
+
+	```bash
+	$ bash set-record-sets.sh
+	```
+	
+11. Curl your key:
+
+	```bash
+	$ curl -X GET https://<yourActualDomain>/mytestkey
+{"key": "mytestkey", "value": "my value", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
+	```
+	
 	💥

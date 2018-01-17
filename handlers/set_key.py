@@ -5,13 +5,13 @@ import boto3
 
 KEY_TABLE_NAME = os.environ['KEY_TABLE']
 CLIENT = boto3.client('dynamodb')
+REGION = os.environ.get('AWS_REGION')
 
 
 def main(event, context):
     body = json.loads(event.get('body'))
     key = event.get('pathParameters').get('key')
     value = body.get('value')
-    region = os.environ.get('AWS_REGION')
 
     if not value:
         response = {
@@ -26,7 +26,7 @@ def main(event, context):
             Item={
                 'key': {'S': key},
                 'value': {'S': value},
-                'region': {'S': region}
+                'region': {'S': REGION}
             }
         )
         response = {
@@ -34,7 +34,7 @@ def main(event, context):
             'body': json.dumps({
                 'key': key,
                 'value': value,
-                'region': region
+                'region': REGION
             })
         }
     except Exception as e:

@@ -5,11 +5,11 @@ import boto3
 
 KEY_TABLE_NAME = os.environ['KEY_TABLE']
 CLIENT = boto3.client('dynamodb')
+REGION = os.environ.get('AWS_REGION')
 
 
 def main(event, context):
     key = event.get('pathParameters').get('key')
-    region = os.environ.get('AWS_REGION')
 
     try:
         resp = CLIENT.get_item(
@@ -25,7 +25,7 @@ def main(event, context):
                 'key': item.get('key', {}).get('S'),
                 'value': item.get('value', {}).get('S'),
                 'writeRegion': item.get('region', {}).get('S'),
-                'readRegion': region,
+                'readRegion': REGION,
             })
         }
     except Exception as e:
