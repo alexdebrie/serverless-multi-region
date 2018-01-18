@@ -1,6 +1,9 @@
-HOSTEDZONE=$(aws route53 list-hosted-zones --query 'HostedZones[?Name==`serverlessteam.com.`].Id' --output text)
-USDOMAIN=$(aws cloudformation describe-stacks --stack-name serverless-keyvalue-dev --region us-west-2 --query 'Stacks[0].Outputs[?OutputKey==`DomainName`].OutputValue' --output text)
-EUROPEDOMAIN=$(aws cloudformation describe-stacks --stack-name serverless-keyvalue-dev --region eu-central-1 --query 'Stacks[0].Outputs[?OutputKey==`DomainName`].OutputValue' --output text)
+DOMAIN=serverlessteam.com
+SUBDOMAIN=keyvalue.${DOMAIN}
+STACKNAME=serverless-keyvalue-dev
+HOSTEDZONE=$(aws route53 list-hosted-zones --query 'HostedZones[?Name==`'${DOMAIN}'.`].Id' --output text)
+USDOMAIN=$(aws cloudformation describe-stacks --stack-name ${STACKNAME} --region us-west-2 --query 'Stacks[0].Outputs[?OutputKey==`DomainName`].OutputValue' --output text)
+EUROPEDOMAIN=$(aws cloudformation describe-stacks --stack-name ${STACKNAME} --region eu-central-1 --query 'Stacks[0].Outputs[?OutputKey==`DomainName`].OutputValue' --output text)
 
 aws route53 change-resource-record-sets \
   --hosted-zone-id ${HOSTEDZONE} \
@@ -10,7 +13,7 @@ aws route53 change-resource-record-sets \
         {
           "Action": "UPSERT",
           "ResourceRecordSet": {
-            "Name": "keyvalue.serverlessteam.com",
+            "Name": "'${SUBDOMAIN}'",
             "Type": "CNAME",
             "TTL": 300,
             "SetIdentifier": "us-west-2",
@@ -25,7 +28,7 @@ aws route53 change-resource-record-sets \
         {
           "Action": "UPSERT",
           "ResourceRecordSet": {
-            "Name": "keyvalue.serverlessteam.com",
+            "Name": "'${SUBDOMAIN}'",
             "Type": "CNAME",
             "TTL": 300,
             "SetIdentifier": "eu-central-1",
