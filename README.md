@@ -1,6 +1,8 @@
 ## Usage (WIP)
 
-1. Change the `domainName` and `certificateName` values in the `custom` block of `serverless.yml` to match your actual domain:
+0. Remember to `npm install` and `pip install awscli [--upgrade]` (at least version `1.14.24`)
+
+1. Change the `domainName` value in the `custom` block of `serverless.yml` to match your actual domain:
 
     ```
     custom:
@@ -35,14 +37,15 @@
 	Set a key in US West:
 	
 	```bash
-	$ curl -X POST https://<apiGatewaydomain>/dev/mytestkey -d '{"value": "Just testing"}'
+	$ US_ENDPOINT=$(aws cloudformation describe-stacks --stack-name ${STACKNAME} --region us-west-2 --query 'Stacks[0].Outputs[?OutputKey==`ServiceEndpoint`].OutputValue' --output text)
+	$ curl $US_ENDPOINT/mytestkey -d '{"value": "Just testing"}'
 	{"key": "mytestkey", "value": "Just testing", "region": "us-west-2"}
 	```
 	
 	Retrieve the key in US West:
 	
 	```bash
-	$ curl -X GET https://<apiGatewaydomain>/dev/mytestkey
+	$ curl $US_ENDPOINT/mytestkey
 	{"key": "mytestkey", "value": "Just testing", "writeRegion": "us-west-2", "readRegion": "us-west-2"}
 	```
 	
@@ -86,28 +89,37 @@
 	Set a key in US West:
 	
 	```bash
-	$ curl -X POST https://<us-west-2-domain>/dev/mytestkey -d '{"value": "Just testing"}'
+	$ curl $US_ENDPOINT/mytestkey -d '{"value": "Just testing"}'
 	{"key": "mytestkey", "value": "Just testing", "region": "us-west-2"}
 	```
 	
 	Retrieve the key in US West:
 	
 	```bash
-	$ curl -X GET https://<eu-central-1-domain>/dev/mytestkey
-{"key": "mytestkey", "value": "my value", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
+	EU_ENDPOINT=$(aws cloudformation describe-stacks --stack-name ${STACKNAME} --region eu-central-1 --query 'Stacks[0].Outputs[?OutputKey==`ServiceEndpoint`].OutputValue' --output text)
+	$ curl $EU_ENDPOINT/mytestkey
+	{"key": "mytestkey", "value": "my value", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
 	```
 
-10. Set up the Route53 Latency records:
+10. Set up the Route53 Latency records (don't forget to open the file and configure your domain and subdomain):
 
 	```bash
 	$ bash set-record-sets.sh
+	{
+	    "ChangeInfo": {
+	        "Status": "PENDING",
+	        "Comment": "...",
+	        "SubmittedAt": "2018-01-18T11:16:44.979Z",
+	        "Id": "/change/C29MDVT401H462"
+	    }
+	}
 	```
 	
 11. Curl your key:
 
 	```bash
-	$ curl -X GET https://<yourActualDomain>/mytestkey
-{"key": "mytestkey", "value": "my value", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
+	$ curl https://<yourActualDomain>/mytestkey
+	{"key": "mytestkey", "value": "my value", "writeRegion": "us-west-2", "readRegion": "eu-central-1"}
 	```
 	
 	💥
