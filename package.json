@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "serverless-domain-manager": "git://github.com/MentalBrake/serverless-domain-manager.git#cbe992e"
+    "serverless-domain-manager": "git://github.com/amplify-education/serverless-domain-manager.git#master"
   },
   "description": ""
 }
