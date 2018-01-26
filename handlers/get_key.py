@@ -26,13 +26,19 @@ def main(event, context):
                 'value': item.get('value', {}).get('S'),
                 'writeRegion': item.get('region', {}).get('S'),
                 'readRegion': REGION,
-            })
+            }),
+            "headers": {
+                "Access-Control-Allow-Origin" : "*",
+            },
         }
     except Exception as e:
         print(e)
         response = {
             "statusCode": 400,
-            "body": json.dumps({"error": "Sorry, an error occurred while retrieving your key."})
+            "body": json.dumps({"error": "Sorry, an error occurred while retrieving your key."}),
+            "headers": {
+                "Access-Control-Allow-Origin" : "*",
+            },
         }
 
     return response

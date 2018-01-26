@@ -39,12 +39,14 @@ functions:
       - http:
           path: /{key}
           method: get
+          cors: true
   setKey:
     handler: handlers/set_key.main
     events:
       - http:
           path: /{key}
           method: post
+          cors: true
 
 resources:
   Resources:
