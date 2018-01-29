@@ -4,14 +4,25 @@ frameworkVersion: ">=1.25.0"
 
 plugins:
   - serverless-domain-manager
+  - serverless-dynamodb-autoscaling
 
 custom:
+  tableName: "keyvalues"
   customDomain:
     domainName: keyvalue.serverlessteam.com
     endpointType: 'regional'
     certificateRegion: ${opt:region}
     createRoute53Record: false
-  tableName: "keyvalues"
+  capacities:
+    - table: KeyValuesDynamoDBTable
+      read:
+        minimum: 5
+        maximum: 50
+        usage: 0.8  # 4 out of 5
+      write:
+        minimum: 10
+        maximum: 100
+        usage: 0.5  # 5 out of 10
 
 provider:
   name: aws
